@@ -1,6 +1,7 @@
 #Table Of Contents
 #### [(EASY) Simple Counter](/examples/simple_counts_static_html.py)
 start here, this is the easiest place to begin and should serve as a hello world type excersize
+[[HTML Output]](https://joranbeasley.github.io/bokeh_wordcloud2/examples/simple_counts_static_html.html)
 #### [(EASY) Word Extraction](/examples/extract_words_static_html.py)
 once you are comfortable with that, lets check out how we can use simple word extraction
 #### [(EASY) Bokeh Server Callback](/examples/python_callbacks_server.py)
