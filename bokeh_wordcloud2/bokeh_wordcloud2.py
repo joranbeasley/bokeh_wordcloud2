@@ -6,6 +6,8 @@ from bokeh.core.property.primitive import String, Float, Int
 from bokeh.events import Event
 from bokeh.models import DataSource, CDSView, Widget, CustomJS, Callback, ColumnDataSource,Button
 
+
+
 class WordClick(Event):
     '''
     Custom Event that is fired when the user clicks a word

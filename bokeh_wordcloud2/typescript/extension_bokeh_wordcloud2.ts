@@ -67,7 +67,18 @@ class DataProvider {
 
 declare function WordCloud(...args: any[]): any
 
-
+function Counter(objects:string[]):{[key:string]:number}{
+    const d:{[key:string]:number} = {}
+    for(let itm of objects){
+        d[itm] = d[itm]?d[itm]+1:1
+    }
+    return d
+}
+function sortedCounter(objects:string[]):[string,number][]{
+    const d = Counter(objects);
+    const arr = Object.keys(d).map((k:string)=>[k as string,d[k] as number]);
+    return arr.sort((a:[string,number],b:[string,number])=>b[1]-a[1]) as [string,number][];
+}
 function choose<T>(choices:T[]):T{
   var index = Math.floor(Math.random() * choices.length);
   return choices[index];
@@ -104,11 +115,13 @@ export class WordCloud2View extends WidgetView {
         shape:string,
     };
     private data: DataProvider;
+
     initialize() {
         super.initialize();
         this.prepare()
     }
     prepare(){
+
         if(this.model.fontWeightFun && typeof this.model.fontWeightFun.execute === "function"){
             this.model.fontWeight = (word:string,weight:number,font_size:number)=>{
                 const data ={word:word,weight:weight,font_size:font_size};
@@ -178,6 +191,15 @@ export class WordCloud2View extends WidgetView {
     }
 
     get_sizes1() {
+        if(!this.model.sizeCol){
+            let words:string[] = []
+            this.data.getRecords().map(record=>{
+                const results = record[this.model.wordCol].toUpperCase().match(/([A-Z]+)/);
+                words.push(...results)
+            });
+            return sortedCounter(words).slice(0,50)
+            // console.log(sortedCounter(this.model.source.get_column(this.model.wordCol) as unknown as string[]));
+        }
         const s: [string, number][] = [];
         this.data.getRecords().map((item) => {
             s.push([item[this.model.wordCol], item[this.model.sizeCol]]);
@@ -302,8 +324,6 @@ export class WordCloud2 extends Widget {
           width: 600,
           height: 400,
           background: "#FFFFCC",
-
-
         })
     }
 
