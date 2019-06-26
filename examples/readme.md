@@ -8,7 +8,7 @@ start here, this is the easiest place to begin and should serve as a hello world
 #### [(EASY) Word Extraction](/examples/extract_words_static_html.py)
 once you are comfortable with that, lets check out how we can use simple word extraction
 
-[[See the HTML Output]](https://joranbeasley.github.io/bokeh_wordcloud2/examples/extract_words_static_html.html?)
+[[See the HTML Output]](https://joranbeasley.github.io/bokeh_wordcloud2/examples/extract_words_static_html.html)
 
 #### [(EASY) Bokeh Server Callback](/examples/python_callbacks_server.py)
 Now lets see how we can interact with our wordcloud from bokeh server
