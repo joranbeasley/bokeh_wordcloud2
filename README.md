@@ -5,7 +5,8 @@ This was made as part of a learning project to make bokeh widgets, but it was to
 
 ## Installation
 
-`pip install https://github.com/joranbeasley/bokeh_wordcloud2.git`
+`pip install git+https://github.com/joranbeasley/bokeh_wordcloud2.git`
 
+or you can clone this repo and run `setup.py install` or `pip install <git_checkout_directory>`
 ## Documentation
 docs are coming soon ... but for now check out the [examples](/examples)
