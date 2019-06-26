@@ -1,0 +1,408 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    
+      <meta charset="utf-8">
+      <title>Bokeh Plot</title>
+      
+      
+        
+          
+        <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.css" type="text/css" />
+        <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.css" type="text/css" />
+        
+        
+          
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.6/wordcloud2.min.js"></script>
+        <script type="text/javascript" src="https://raw.githubusercontent.com/timdream/wordcloud2.js/gh-pages/src/wordcloud2.js"></script>
+        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-1.2.0.min.js"></script>
+        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.2.0.min.js"></script>
+        <script type="text/javascript">
+            Bokeh.set_log_level("info");
+        </script>
+
+        <script type="text/javascript">
+          (function(root, factory) {
+          //  if(typeof exports === 'object' && typeof module === 'object')
+          //    factory(require("Bokeh"));
+          //  else if(typeof define === 'function' && define.amd)
+          //    define(["Bokeh"], factory);
+          //  else if(typeof exports === 'object')
+          //    factory(require("Bokeh"));
+          //  else
+              factory(root["Bokeh"]);
+          })(this, function(Bokeh) {
+            var define;
+            return (function outer(modules, entry) {
+            if (Bokeh != null) {
+              return Bokeh.register_plugin(modules, {}, entry);
+            } else {
+              throw new Error("Cannot find Bokeh. You have to load it prior to loading plugins.");
+            }
+          })
+          ({
+            "custom/main": function(require, module, exports) {
+              var models = {
+                "WordCloud2": require("custom/bokeh_wordcloud2.bokeh_wordcloud2.word_cloud2").WordCloud2
+              };
+              require("base").register_models(models);
+              module.exports = models;
+            },
+            "custom/bokeh_wordcloud2.bokeh_wordcloud2.word_cloud2": function(require, module, exports) {
+          "use strict";
+          var __extends = (this && this.__extends) || (function () {
+              var extendStatics = function (d, b) {
+                  extendStatics = Object.setPrototypeOf ||
+                      ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                      function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+                  return extendStatics(d, b);
+              };
+              return function (d, b) {
+                  extendStatics(d, b);
+                  function __() { this.constructor = d; }
+                  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+              };
+          })();
+          var __assign = (this && this.__assign) || function () {
+              __assign = Object.assign || function(t) {
+                  for (var s, i = 1, n = arguments.length; i < n; i++) {
+                      s = arguments[i];
+                      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                          t[p] = s[p];
+                  }
+                  return t;
+              };
+              return __assign.apply(this, arguments);
+          };
+          var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+              var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+              if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+              else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+              return c > 3 && r && Object.defineProperty(target, key, r), r;
+          };
+          Object.defineProperty(exports, "__esModule", { value: true });
+          // import {DataProvider} from "models/widgets/tables/data_table";
+          var widget_1 = require("models/widgets/widget");
+          var p = require("core/properties");
+          var cds_view_1 = require("models/sources/cds_view");
+          var widgets_1 = require("models/widgets");
+          var column_data_source_1 = require("models/sources/column_data_source");
+          var object_1 = require("core/util/object");
+          var array_1 = require("core/util/array");
+          var bokeh_events_1 = require("core/bokeh_events");
+          exports.DTINDEX_NAME = "__bkdt_internal_index__";
+          function event(event_name) {
+              return function (cls) {
+                  cls.prototype.event_name = event_name;
+              };
+          }
+          var WordClickEvent = /** @class */ (function (_super) {
+              __extends(WordClickEvent, _super);
+              function WordClickEvent(word, weight) {
+                  var _this = _super.call(this) || this;
+                  _this.word = word;
+                  _this.weight = weight;
+                  return _this;
+              }
+              WordClickEvent.prototype._to_json = function () {
+                  var _a = this, word = _a.word, weight = _a.weight;
+                  return __assign({}, _super.prototype._to_json.call(this), { weight: weight, word: word });
+              };
+              WordClickEvent = __decorate([
+                  event("word_click_event")
+              ], WordClickEvent);
+              return WordClickEvent;
+          }(bokeh_events_1.BokehEvent));
+          exports.WordClickEvent = WordClickEvent;
+          // export type myCB<T> = CallbackLike<T, [string,number,number,number,number], Ret>
+          var DataProvider = /** @class */ (function () {
+              function DataProvider(source, view) {
+                  this.source = source;
+                  this.view = view;
+                  if (exports.DTINDEX_NAME in this.source.data)
+                      throw new Error("special name " + exports.DTINDEX_NAME + " cannot be used as a data table column");
+                  this.index = this.view.indices;
+              }
+              DataProvider.prototype.getLength = function () {
+                  return this.index.length;
+              };
+              DataProvider.prototype.getItem = function (offset) {
+                  var item = {};
+                  for (var _i = 0, _a = object_1.keys(this.source.data); _i < _a.length; _i++) {
+                      var field = _a[_i];
+                      item[field] = this.source.data[field][this.index[offset]];
+                  }
+                  item[exports.DTINDEX_NAME] = this.index[offset];
+                  return item;
+              };
+              DataProvider.prototype.getRecords = function () {
+                  var _this = this;
+                  return array_1.range(0, this.getLength()).map(function (i) { return _this.getItem(i); });
+              };
+              return DataProvider;
+          }());
+          function choose(choices) {
+              var index = Math.floor(Math.random() * choices.length);
+              return choices[index];
+          }
+          function choose_str(original_list) {
+              return choose(original_list);
+          }
+          var WordCloud2View = /** @class */ (function (_super) {
+              __extends(WordCloud2View, _super);
+              function WordCloud2View() {
+                  return _super !== null && _super.apply(this, arguments) || this;
+              }
+              WordCloud2View.prototype.initialize = function () {
+                  _super.prototype.initialize.call(this);
+                  this.prepare();
+              };
+              WordCloud2View.prototype.prepare = function () {
+                  var _this = this;
+                  if (this.model.fontWeightFun && typeof this.model.fontWeightFun.execute === "function") {
+                      this.model.fontWeight = function (word, weight, font_size) {
+                          var data = { word: word, weight: weight, font_size: font_size };
+                          return _this.model.fontWeightFun ? _this.model.fontWeightFun.execute(_this.model, data) : "normal";
+                      };
+                  }
+                  if (this.model.classesFun && typeof this.model.classesFun.execute === "function") {
+                      this.model.classes = function (word, weight, font_size) {
+                          var data = { word: word, weight: weight, font_size: font_size };
+                          return _this.model.classesFun ? _this.model.classesFun.execute(_this.model, data) : "normal";
+                      };
+                  }
+                  if (this.model.colorsFun && typeof this.model.colorsFun.execute === "function") {
+                      // its a callback
+                      this.model.colors = function (word, weight, font_size, distance, theta) {
+                          var data = { word: word, weight: weight, font_size: font_size, distance: distance, theta: theta };
+                          return _this.model.colorsFun ? _this.model.colorsFun.execute(_this.model, data) : "pink";
+                      };
+                  }
+                  else if (typeof this.model.colors === "object" && typeof this.model.colors.slice === "function") {
+                      // its a list??
+                      var original_list_1 = this.model.colors;
+                      this.model.colors = function () { return choose_str(original_list_1); };
+                  }
+                  else if (typeof this.model.colors === "string") {
+                      var col = this.model.source.get_column(this.model.colors);
+                      if (col && col.length > 0) {
+                          var data_1 = {};
+                          var colors = this.model.source.get_column(this.model.colors);
+                          var keys_1 = this.model.source.get_column(this.model.wordCol);
+                          if (keys_1 && keys_1.length && colors && colors.length) {
+                              for (var i = 0; i < keys_1.length; i++) {
+                                  if (keys_1[i] && colors[i]) {
+                                      data_1[keys_1[i]] = colors[i];
+                                  }
+                              }
+                          }
+                          this.model.colors = function (word) { return data_1[word]; };
+                      }
+                  }
+              };
+              // private grid: SlickGrid
+              // update_data() {
+              //     this.model.view.compute_indices()
+              //     this.data.constructor(this.model.source, this.model.view)
+              //     this.render()
+              // }
+              WordCloud2View.prototype.connect_signals = function () {
+                  var _this = this;
+                  _super.prototype.connect_signals.call(this);
+                  // this.connect(this.model.change, () => this.render())
+                  //
+                  // this.connect(this.model.source.streaming, () => this.updateGrid())
+                  // this.connect(this.model.source.patching, () => this.updateGrid())
+                  this.connect(this.model.source.change, function () {
+                      _this.prepare();
+                      _this.render();
+                  });
+                  // this.connect(this.model.source.properties.data.change, () => this.updateGrid())
+                  //
+                  // this.connect(this.model.source.selected.change, () => this.updateSelection())
+                  // this.connect(this.model.source.selected.properties.indices.change, () => this.updateSelection())
+              };
+              WordCloud2View.prototype.css_classes = function () {
+                  return _super.prototype.css_classes.call(this).concat("bk-data-table");
+              };
+              WordCloud2View.prototype.get_sizes1 = function () {
+                  var _this = this;
+                  var s = [];
+                  this.data.getRecords().map(function (item) {
+                      s.push([item[_this.model.wordCol], item[_this.model.sizeCol]]);
+                  });
+                  return s;
+              };
+              WordCloud2View.prototype.render = function () {
+                  var _this = this;
+                  _super.prototype.render.call(this);
+                  this.data = new DataProvider(this.model.source, this.model.view);
+                  var sizes = this.get_sizes1();
+                  console.log("SIZES:", sizes);
+                  var canvas = document.createElement("canvas");
+                  canvas.width = this.model.width;
+                  canvas.height = this.model.height;
+                  // const colors: string[] = this.model.colors ? this.model.colors : [this.model.color,];
+                  var opts = {
+                      list: sizes,
+                      fontFamily: 'Times, serif',
+                      gridSize: Math.round(16 * this.model.width / 1024),
+                      weightFactor: function (size) {
+                          return Math.pow(size, 2.3) * _this.model.height / 1024;
+                      },
+                      color: this.model.colors,
+                      rotateRatio: this.model.rotateRatio,
+                      minRotation: this.model.minRotation,
+                      maxRotation: this.model.maxRotation,
+                      rotationSteps: this.model.rotationSteps,
+                      shuffle: false,
+                      backgroundColor: this.model.background,
+                      drawOutOfBound: false,
+                      classes: this.model.classes,
+                      fontWeight: this.model.fontWeight,
+                      shape: this.model.shape,
+                      click: (!this.model.click) ? null : function () {
+                          var args = [];
+                          for (var _i = 0; _i < arguments.length; _i++) {
+                              args[_i] = arguments[_i];
+                          }
+                          var source = new column_data_source_1.ColumnDataSource({ data: { word: [args[0][0]], weight: [args[0][1]] } });
+                          source.selected.indices = [0]; // update our "selected" indices ...
+                          var data = { word: args[0][0], weight: args[0][1], dimensions: args[1], event: args[2], source: source };
+                          // trigger event to python
+                          _this.model.trigger_event(new WordClickEvent(data.word, data.weight));
+                          // trigger user js click handler
+                          if (_this.model.click)
+                              _this.model.click.execute(_this.model, data);
+                      },
+                      hover: (!this.model.hover) ? null : function () {
+                          var args = [];
+                          for (var _i = 0; _i < arguments.length; _i++) {
+                              args[_i] = arguments[_i];
+                          }
+                          if (_this.model.hover) {
+                              var data = { word: args[0][0], weight: args[0][1], dimensions: args[1], event: args[2] };
+                              _this.model.hover.execute(_this.model, data);
+                          }
+                      },
+                  };
+                  this.el.appendChild(canvas);
+                  WordCloud(canvas, opts);
+              };
+              return WordCloud2View;
+          }(widget_1.WidgetView));
+          exports.WordCloud2View = WordCloud2View;
+          var WordCloud2 = /** @class */ (function (_super) {
+              __extends(WordCloud2, _super);
+              function WordCloud2(attrs) {
+                  return _super.call(this, attrs) || this;
+              }
+              WordCloud2.initClass = function () {
+                  this.prototype.type = 'WordCloud2';
+                  this.prototype.default_view = WordCloud2View;
+                  this.define({
+                      // every property here should be defined in the namespace above
+                      // and in the pyfile with exactly the same name
+                      source: [p.Instance],
+                      view: [p.Instance, function () { return new cds_view_1.CDSView(); }],
+                      wordCol: [p.String],
+                      sizeCol: [p.String],
+                      colors: [p.Any, "blue"],
+                      colorsFun: [p.Instance, null],
+                      fontWeight: [p.String, "normal"],
+                      fontWeightFun: [p.Instance, null],
+                      classes: [p.String, ""],
+                      classesFun: [p.Instance, null],
+                      hover: [p.Instance, null],
+                      click: [p.Instance, null],
+                      rotateRatio: [p.Number, 1],
+                      minRotation: [p.Number, 0],
+                      maxRotation: [p.Number, Math.PI / 2],
+                      rotationSteps: [p.Number, 32],
+                      shape: [p.String, "square"]
+                  });
+                  this.override({
+                      width: 600,
+                      height: 400,
+                      background: "#FFFFCC",
+                  });
+              };
+              return WordCloud2;
+          }(widgets_1.Widget));
+          exports.WordCloud2 = WordCloud2;
+          WordCloud2.initClass();
+          
+          }
+          }, "custom/main");
+          ;
+          });
+          
+        </script>
+        
+      
+      
+    
+  </head>
+  
+  
+  <body>
+    
+      
+        
+          
+          
+            
+              <div class="bk-root" id="046902d6-7500-41b9-b40d-abd5daec10cb" data-root-id="1002"></div>
+            
+          
+        
+      
+      
+        <script type="application/json" id="1020">
+          {"abf53ea9-c0af-4170-ac6d-c172efc0c166":{"roots":{"references":[{"attributes":{},"id":"1004","type":"UnionRenderers"},{"attributes":{},"id":"1005","type":"Selection"},{"attributes":{"classesFun":null,"click":null,"colors":["pink","blue","green"],"colorsFun":null,"fontWeightFun":null,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1003","type":"CDSView"},"wordCol":"names"},"id":"1002","type":"WordCloud2"},{"attributes":{"callback":null,"data":{"names":["susan","tom","frankie","roger","amy","nicole","joran","mark","brianne","michael","greg","adrian","drew"],"weights":[6,3,8,7,9,10,5,4,7,8,4,6,9]},"selected":{"id":"1005","type":"Selection"},"selection_policy":{"id":"1004","type":"UnionRenderers"}},"id":"1001","type":"ColumnDataSource"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1003","type":"CDSView"}],"root_ids":["1002"]},"title":"Bokeh Application","version":"1.2.0"}}
+        </script>
+        <script type="text/javascript">
+          (function() {
+            var fn = function() {
+              Bokeh.safely(function() {
+                (function(root) {
+                  function embed_document(root) {
+                    
+                  var docs_json = document.getElementById('1020').textContent;
+                  var render_items = [{"docid":"abf53ea9-c0af-4170-ac6d-c172efc0c166","roots":{"1002":"046902d6-7500-41b9-b40d-abd5daec10cb"}}];
+                  root.Bokeh.embed.embed_items(docs_json, render_items);
+                
+                  }
+                  if (root.Bokeh !== undefined) {
+                    embed_document(root);
+                  } else {
+                    var attempts = 0;
+                    var timer = setInterval(function(root) {
+                      if (root.Bokeh !== undefined) {
+                        embed_document(root);
+                        clearInterval(timer);
+                      }
+                      attempts++;
+                      if (attempts > 100) {
+                        console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+                        clearInterval(timer);
+                      }
+                    }, 10, root)
+                  }
+                })(window);
+              });
+            };
+            if (document.readyState != "loading") fn();
+            else document.addEventListener("DOMContentLoaded", fn);
+          })();
+        </script>
+    
+  </body>
+  
+</html>
