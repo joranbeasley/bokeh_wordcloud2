@@ -20,7 +20,6 @@ explore the various options available
 explore the various options available
 
 [[See the HTML Output]](https://joranbeasley.github.io/bokeh_wordcloud2/examples/simple_options_colors.html?)
-
 #### [(RECOMMEND) Advanced Options](/examples/advanced_options.py)
 more advanced callback options 
 
