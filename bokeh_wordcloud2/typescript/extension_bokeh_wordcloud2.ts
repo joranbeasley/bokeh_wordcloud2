@@ -211,7 +211,6 @@ export class WordCloud2View extends WidgetView {
         super.render();
         this.data = new DataProvider(this.model.source, this.model.view);
         let sizes = this.get_sizes1()
-        console.log("SIZES:",sizes);
         const canvas = document.createElement("canvas")
         canvas.width = this.model.width;
         canvas.height = this.model.height;
@@ -246,6 +245,7 @@ export class WordCloud2View extends WidgetView {
             },
             hover: (!this.model.hover)?null:(...args:any[])=>{
                 if(this.model.hover) {
+                    if (!args || !args[0])return;
                     const data = {word: args[0][0], weight: args[0][1], dimensions: args[1], event: args[2]};
                     this.model.hover.execute(this.model, data);
                 }

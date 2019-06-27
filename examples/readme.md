@@ -26,3 +26,5 @@ more advanced callback options
 
 #### [(INTERMEDIATE) Javascript Callback Events](/examples/js_callbacks.py)
 subscribe to hover and click events in javascript
+
+[[See the HTML Output]](https://joranbeasley.github.io/bokeh_wordcloud2/examples/js_callbacks.html)
