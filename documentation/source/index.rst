@@ -13,6 +13,9 @@ a (mostly) complete implementation of https://wordcloud2-js.timdream.org
 
    getting_started
 
+.. raw:: html
+   :file: _static/simple_options_colors.html
+
 Indices and tables
 ==================
 

@@ -51,6 +51,8 @@ here is a super simple word cloud to get you started
 
 when you run the application you should see a webpage open with your newly created Wordcloud
 
+.. raw:: html
+   :file: _static/simple_counts_static_html.html
 
 Using a corpus instead
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,10 +60,12 @@ Using a corpus instead
 if you dont specify a ``sizeCol``, then it will extract all the words from the ``wordCol``
 and use the counts as a size
 
+.. raw:: html
+   :file: _static/extract_words_static_html.html
+
 | you can find this example at
   `Example Source <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/extract_words_static_html.py>`_
-| you can see its html here
-  `Example HMTL <_static/extract_words_static_html.html>`_
+
 
 .. code-block:: python
 
@@ -114,31 +118,19 @@ or we can supply a javascript callback that returns a string, but we name it sli
 | you can find this example at
   `Color Options <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/simple_options_colors.py>`_
 | you can see its html here
-  `Example HMTL <_static/simple_options_colors.html>`_
+  `Color Options HMTL <_static/simple_options_colors.html>`_
 
 Clicks And Hovers
 ~~~~~~~~~~~~~~~~~
 you can subscribe to either clicks or hovers with a javascript object
 
-.. code-block:: python
-
-   wordcloud = WordCloud2(source=test1,wordCol="names",sizeCol="weights",colors=['pink','blue','green'])
-   div = Div(text="")
-   div1 = Div(text="")
-   wordcloud.click = CustomJS(args={'div':div},code='''
-   console.log(`you clicked ${cb_data.word}`)
-   div.text = `you clicked ${cb_data.word}`
-   ''')
-   wordcloud.hover = CustomJS(args={'div':div1},code='''
-   console.log(`HOV: ${cb_data.word}`)
-   div.text = `HOVER: ${cb_data.word}`
-   ''')
-
+.. raw:: html
+   :file: _static/js_callbacks.html
 
 | you can find this example at
-  `Color Options <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/js_callbacks.py>`_
+  `JS Callbacks <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/js_callbacks.py>`_
 | you can see its html here
-  `Example HMTL <_static/js_callbacks.html>`_
+  `JS Callbacks HMTL <_static/js_callbacks.html>`_
 
 Python Click Callback
 ~~~~~~~~~~~~~~~~~~~~~
@@ -170,5 +162,5 @@ you can also subscribe to the click handler in python if you are running with bo
    curdoc().add_root(column(wordcloud))
 
 | you can find this example at
-  `Color Options <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/python_callbacks_server.py>`_
-| *since you must be running with ``bokeh serve app.py`` I cannot show you the html
+  `Bokeh Server Example <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/python_callbacks_server.py>`_
+| *since you must be running with* ``bokeh serve app.py`` * I cannot show you the html*
