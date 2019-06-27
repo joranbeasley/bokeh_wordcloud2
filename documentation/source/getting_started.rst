@@ -66,22 +66,6 @@ and use the counts as a size
 | you can find this example at
   `Example Source <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/extract_words_static_html.py>`_
 
-
-.. code-block:: python
-
-   from bokeh.io import show
-   from bokeh.models import ColumnDataSource
-   from bokeh_wordcloud2 import WordCloud2
-   titles = ['lorem ipsum dolor sit amet',
-             'consectetur adipiscing elit',
-             ... (ALOT MORE) ...
-             'cras iaculis semper odio',
-             'eu posuere urna vulputate sed']
-   test2 = ColumnDataSource({'titles':titles})
-   # we will randomly select from 3 colors
-   wc = WordCloud2(source=test2,wordCol="titles",colors=['pink','blue','green'])
-   show(wc)
-
 Color Options
 ~~~~~~~~~~~~~
 
@@ -163,4 +147,4 @@ you can also subscribe to the click handler in python if you are running with bo
 
 | you can find this example at
   `Bokeh Server Example <https://github.com/joranbeasley/bokeh_wordcloud2/tree/master/examples/python_callbacks_server.py>`_
-| *since you must be running with* ``bokeh serve app.py`` * I cannot show you the html*
+| *since you must be running with* ``bokeh serve app.py`` *I cannot show you the html*
