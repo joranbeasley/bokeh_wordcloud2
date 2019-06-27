@@ -9,5 +9,5 @@ This was made as part of a learning project to make bokeh widgets, but it was to
 
 or you can clone this repo and run `setup.py install` or `pip install <git_checkout_directory>`
 ## Documentation
-## [>>> Read The Docs <<<](https://bokeh-wordcloud2.readthedocs.io/en/latest/getting_started.html#examples)
+## [>>> |Read The Docs| <<<](https://bokeh-wordcloud2.readthedocs.io/en/latest/getting_started.html#examples)
 and check out the [examples](/examples)
