@@ -22,7 +22,8 @@ data = [
 ]
 names,weights = zip(*data)
 test1 = ColumnDataSource({'names':names,'weights':weights})
-sdp = WordCloud2(source=test1,wordCol="names",sizeCol="weights",colors=['pink','blue','green'])
+wordcloud = WordCloud2(source=test1, wordCol="names", sizeCol="weights", colors=['pink', 'blue', 'green'])
+
 def clicked_word(evt):
     data=test1.data
     if(7 < evt.weight < 20 ):
@@ -39,5 +40,5 @@ def clicked_word(evt):
 button = Div(text="<h1>Click A Word!</h1>")
 # button.on_click(callback)
 # show(sdp)
-sdp.on_click(clicked_word)
-curdoc().add_root(column(sdp))
+wordcloud.on_click(clicked_word)
+curdoc().add_root(column(wordcloud))
