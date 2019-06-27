@@ -1,6 +1,8 @@
 # bokeh_wordcloud2
 a (mostly complete) bokeh implementation of [wordcloud2-js](https://wordcloud2-js.timdream.org)
 
+This extension attempts to make wordcloud available inside the bokeh ecosystem
+
 This was made as part of a learning project to make bokeh widgets, but it was too good not to share.
 
 ## Installation
