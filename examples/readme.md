@@ -13,6 +13,7 @@ once you are comfortable with that, lets check out how we can use simple word ex
 #### [(EASY) Bokeh Server Callback](/examples/python_callbacks_server.py)
 Now lets see how we can interact with our wordcloud from bokeh server
 
+*Sorry I cant link you to static html here... you need to download it and run it with* `bokeh serve examples\python_callbacks_server.py`
 #### [(REQUIRED) Options](/examples/simple_options.py)
 explore the various options available
 

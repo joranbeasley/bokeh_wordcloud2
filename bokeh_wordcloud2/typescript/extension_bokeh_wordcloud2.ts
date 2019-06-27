@@ -235,7 +235,7 @@ export class WordCloud2View extends WidgetView {
             classes:this.model.classes,
             fontWeight:this.model.fontWeight,
             shape: this.model.shape,
-            click: (!this.model.click)?null:(...args:any[])=>{
+            click: (...args:any[])=>{
                 const source = new ColumnDataSource({data:{word:[args[0][0]],weight:[args[0][1]]}});
                 source.selected.indices =[0]; // update our "selected" indices ...
                 const data = {word:args[0][0],weight:args[0][1],dimensions:args[1],event:args[2],source:source};
