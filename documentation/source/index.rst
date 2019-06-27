@@ -7,6 +7,7 @@ Welcome to bokeh_wordcloud2's documentation!
 ============================================
 
 a (mostly) complete implementation of https://wordcloud2-js.timdream.org
+This package aims to provide a wordcloud extension for bokeh
 
 .. toctree::
    :maxdepth: 2
