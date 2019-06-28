@@ -18,6 +18,9 @@ export type Item = { [key: string]: any }
 export type data_ob_color_cb={
     word:string,weight:number,fontsize:number,distance:number,theta:number
 }
+export type data_ob_weightFactor_cb={
+    size:number
+}
 
 function event(event_name: string) {
   return function(cls: Class<BokehEvent>) {
@@ -86,7 +89,9 @@ function choose<T>(choices:T[]):T{
 function choose_str(original_list: string[]) : string{
     return choose<string>(original_list);
 }
-
+interface IAttr{
+    [key:string]:any
+}
 export class WordCloud2View extends WidgetView {
     model: WordCloud2 & {
         source: ColumnDataSource;
@@ -99,6 +104,7 @@ export class WordCloud2View extends WidgetView {
         colors:string|string[]|((...args:any[]) => string);
         colorsFun:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
         fontWeight:number|((...a:any[])=>any),
+        weightFactor:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number>|null,
 
         fontWeightFun:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
         classes:string|((...a:any[])=>any),
@@ -115,17 +121,26 @@ export class WordCloud2View extends WidgetView {
         shape:string,
     };
     private data: DataProvider;
-
+    private DEFAULT_WEIGHT_FACTOR(size:number){
+                return Math.pow(size, 2.3) *  this.model.height / 1024;
+    }
     initialize() {
+        this.DEFAULT_WEIGHT_FACTOR = this.DEFAULT_WEIGHT_FACTOR.bind(this);
         super.initialize();
         this.prepare()
     }
     prepare(){
-
         if(this.model.fontWeightFun && typeof this.model.fontWeightFun.execute === "function"){
             this.model.fontWeight = (word:string,weight:number,font_size:number)=>{
                 const data ={word:word,weight:weight,font_size:font_size};
                 return this.model.fontWeightFun?this.model.fontWeightFun.execute(this.model,data):"normal";
+            }
+        }
+        if(this.model.weightFactor && typeof (this.model.weightFactor as IAttr)['execute'] === "function"){
+            const cb_func:CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number> = this.model.weightFactor as CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number>;
+            this.model.weightFactor = (size:number)=>{
+                const data ={size:size};
+                return cb_func?cb_func.execute(this.model,data):this.DEFAULT_WEIGHT_FACTOR
             }
         }
         if(this.model.classesFun && typeof this.model.classesFun.execute === "function"){
@@ -216,13 +231,12 @@ export class WordCloud2View extends WidgetView {
         canvas.height = this.model.height;
 
         // const colors: string[] = this.model.colors ? this.model.colors : [this.model.color,];
+
         const opts = {
             list: sizes,
             fontFamily: 'Times, serif',
             gridSize: Math.round(16 *  this.model.width / 1024),
-            weightFactor:  (size:number) => {
-                return Math.pow(size, 2.3) *  this.model.height / 1024;
-            },
+            weightFactor: this.model.weightFactor?this.model.weightFactor:this.DEFAULT_WEIGHT_FACTOR ,
             color: this.model.colors,
             rotateRatio: this.model.rotateRatio,
             minRotation: this.model.minRotation,
@@ -280,6 +294,7 @@ export namespace WordCloud2 {
         maxRotation:p.Property<number>
         rotationSteps:p.Property<number>
         shape:p.Property<string>
+        weightFactor:p.Property<number|((...args:any[])=>number)|null>
     }
 }
 
@@ -316,7 +331,8 @@ export class WordCloud2 extends Widget {
             minRotation:[p.Number,  0],
             maxRotation:[p.Number,  Math.PI/2],
             rotationSteps:[p.Number,  32],
-            shape: [p.String, "square"]
+            shape: [p.String, "square"],
+            weightFactor: [p.Any, null],
 
         });
 

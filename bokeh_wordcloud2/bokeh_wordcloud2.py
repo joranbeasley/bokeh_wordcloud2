@@ -37,6 +37,8 @@ class _WordCloud2Meta(Widget):
 
     ]
 
+
+
 class WordCloud2(_WordCloud2Meta):
     source = Instance(DataSource, help="""
         The source of data for the widget.
@@ -56,6 +58,7 @@ class WordCloud2(_WordCloud2Meta):
     fontWeightFun = Instance(CustomJS,help="a customjs function that will determine the fontWeight(see `cb_obj`)")
     classes = String(help="a class name or function to use ... only works if using DOM elements, which are currently unsupported... so this does nothing for now")
     classesFun = Instance(CustomJS,help="see `classes`")
+    weightFactor = Either(Instance(CustomJS),Float,help="a multiplier to apply to the sizes or a CustomJS instance")
 
     rotateRatio = Float(help="the odds of a given word rotating between 0-1",default=1)
     minRotation = Float(help="the minimum amount(in radians) to rotate",default=0)
