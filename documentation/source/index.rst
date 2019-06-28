@@ -14,6 +14,8 @@ This package aims to provide a wordcloud extension for bokeh
 
    getting_started
 
+`Check out an interactive short tutorial in jupyter <https://gke.mybinder.org/v2/gh/joranbeasley/bokeh-wordcloud-notebook/master?filepath=bokeh_wordcloud2.ipynb>`_
+
 .. raw:: html
    :file: _static/simple_options_colors.html
 

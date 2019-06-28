@@ -323,7 +323,7 @@ export class WordCloud2 extends Widget {
         this.override({
           width: 600,
           height: 400,
-          background: "#FFFFCC",
+          background: "#FFFFFF",
         })
     }
 
