@@ -60,7 +60,7 @@ titles = ['lorem ipsum dolor sit amet',
           'vitae mollis ligula malesuada ut']
 
 test1 = ColumnDataSource({'titles':titles})
-sdp = WordCloud2(source=test1,wordCol="titles",colors=['pink','blue','green'])
+sdp = WordCloud2(source=test1,wordCol="titles",color=['pink','blue','green'])
 show(column([sdp,
              Div(text="""
 <pre>

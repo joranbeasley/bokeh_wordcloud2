@@ -102,6 +102,7 @@
                   cls.prototype.event_name = event_name;
               };
           }
+          // @setExperimentalDecorators
           var WordClickEvent = /** @class */ (function (_super) {
               __extends(WordClickEvent, _super);
               function WordClickEvent(word, weight) {
@@ -147,6 +148,19 @@
               };
               return DataProvider;
           }());
+          function Counter(objects) {
+              var d = {};
+              for (var _i = 0, objects_1 = objects; _i < objects_1.length; _i++) {
+                  var itm = objects_1[_i];
+                  d[itm] = d[itm] ? d[itm] + 1 : 1;
+              }
+              return d;
+          }
+          function sortedCounter(objects) {
+              var d = Counter(objects);
+              var arr = Object.keys(d).map(function (k) { return [k, d[k]]; });
+              return arr.sort(function (a, b) { return b[1] - a[1]; });
+          }
           function choose(choices) {
               var index = Math.floor(Math.random() * choices.length);
               return choices[index];
@@ -159,41 +173,55 @@
               function WordCloud2View() {
                   return _super !== null && _super.apply(this, arguments) || this;
               }
+              WordCloud2View.prototype.DEFAULT_WEIGHT_FACTOR = function (size) {
+                  return Math.pow(size, 2.3) * this.model.height / 1024;
+              };
               WordCloud2View.prototype.initialize = function () {
+                  this.DEFAULT_WEIGHT_FACTOR = this.DEFAULT_WEIGHT_FACTOR.bind(this);
                   _super.prototype.initialize.call(this);
                   this.prepare();
               };
               WordCloud2View.prototype.prepare = function () {
                   var _this = this;
-                  if (this.model.fontWeightFun && typeof this.model.fontWeightFun.execute === "function") {
+                  if (this.model.fontWeight && typeof this.model.fontWeight['execute'] === "function") {
+                      var cb_func_1 = this.model.weightFactor;
                       this.model.fontWeight = function (word, weight, font_size) {
                           var data = { word: word, weight: weight, font_size: font_size };
-                          return _this.model.fontWeightFun ? _this.model.fontWeightFun.execute(_this.model, data) : "normal";
+                          return cb_func_1.execute(_this.model, data);
                       };
                   }
-                  if (this.model.classesFun && typeof this.model.classesFun.execute === "function") {
+                  if (this.model.weightFactor && typeof this.model.weightFactor['execute'] === "function") {
+                      var cb_func_2 = this.model.weightFactor;
+                      this.model.weightFactor = function (size) {
+                          var data = { size: size };
+                          return cb_func_2 ? cb_func_2.execute(_this.model, data) : _this.DEFAULT_WEIGHT_FACTOR;
+                      };
+                  }
+                  if (this.model.classes && typeof this.model.classes['execute'] === "function") {
+                      var cb_func_3 = this.model.classes;
                       this.model.classes = function (word, weight, font_size) {
                           var data = { word: word, weight: weight, font_size: font_size };
-                          return _this.model.classesFun ? _this.model.classesFun.execute(_this.model, data) : "normal";
+                          return cb_func_3.execute(_this.model, data);
                       };
                   }
-                  if (this.model.colorsFun && typeof this.model.colorsFun.execute === "function") {
+                  if (this.model.color && typeof this.model.color['execute'] === "function") {
                       // its a callback
-                      this.model.colors = function (word, weight, font_size, distance, theta) {
+                      var cb_func_4 = this.model.color;
+                      this.model.color = function (word, weight, font_size, distance, theta) {
                           var data = { word: word, weight: weight, font_size: font_size, distance: distance, theta: theta };
-                          return _this.model.colorsFun ? _this.model.colorsFun.execute(_this.model, data) : "pink";
+                          return cb_func_4.execute(_this.model, data);
                       };
                   }
-                  else if (typeof this.model.colors === "object" && typeof this.model.colors.slice === "function") {
+                  else if (typeof this.model.color === "object" && typeof this.model.color['slice'] === "function") {
                       // its a list??
-                      var original_list_1 = this.model.colors;
-                      this.model.colors = function () { return choose_str(original_list_1); };
+                      var original_list_1 = this.model.color;
+                      this.model.color = function () { return choose_str(original_list_1); };
                   }
-                  else if (typeof this.model.colors === "string") {
-                      var col = this.model.source.get_column(this.model.colors);
+                  else if (typeof this.model.color === "string") {
+                      var col = this.model.source.get_column(this.model.color);
                       if (col && col.length > 0) {
                           var data_1 = {};
-                          var colors = this.model.source.get_column(this.model.colors);
+                          var colors = this.model.source.get_column(this.model.color);
                           var keys_1 = this.model.source.get_column(this.model.wordCol);
                           if (keys_1 && keys_1.length && colors && colors.length) {
                               for (var i = 0; i < keys_1.length; i++) {
@@ -202,7 +230,7 @@
                                   }
                               }
                           }
-                          this.model.colors = function (word) { return data_1[word]; };
+                          this.model.color = function (word) { return data_1[word]; };
                       }
                   }
               };
@@ -233,6 +261,15 @@
               };
               WordCloud2View.prototype.get_sizes1 = function () {
                   var _this = this;
+                  if (!this.model.sizeCol) {
+                      var words_1 = [];
+                      this.data.getRecords().map(function (record) {
+                          var results = record[_this.model.wordCol].toUpperCase().match(/([A-Z]+)/);
+                          words_1.push.apply(words_1, results);
+                      });
+                      return sortedCounter(words_1).slice(0, 50);
+                      // console.log(sortedCounter(this.model.source.get_column(this.model.wordCol) as unknown as string[]));
+                  }
                   var s = [];
                   this.data.getRecords().map(function (item) {
                       s.push([item[_this.model.wordCol], item[_this.model.sizeCol]]);
@@ -244,7 +281,6 @@
                   _super.prototype.render.call(this);
                   this.data = new DataProvider(this.model.source, this.model.view);
                   var sizes = this.get_sizes1();
-                  console.log("SIZES:", sizes);
                   var canvas = document.createElement("canvas");
                   canvas.width = this.model.width;
                   canvas.height = this.model.height;
@@ -253,10 +289,8 @@
                       list: sizes,
                       fontFamily: 'Times, serif',
                       gridSize: Math.round(16 * this.model.width / 1024),
-                      weightFactor: function (size) {
-                          return Math.pow(size, 2.3) * _this.model.height / 1024;
-                      },
-                      color: this.model.colors,
+                      weightFactor: this.model.weightFactor ? this.model.weightFactor : this.DEFAULT_WEIGHT_FACTOR,
+                      color: this.model.color,
                       rotateRatio: this.model.rotateRatio,
                       minRotation: this.model.minRotation,
                       maxRotation: this.model.maxRotation,
@@ -267,14 +301,30 @@
                       classes: this.model.classes,
                       fontWeight: this.model.fontWeight,
                       shape: this.model.shape,
-                      click: (!this.model.click) ? null : function () {
-                          var args = [];
-                          for (var _i = 0; _i < arguments.length; _i++) {
-                              args[_i] = arguments[_i];
+                      click: function (target, dimensions, event) {
+                          var source = undefined;
+                          if (_this.model.sizeCol) {
+                              var len_recs = _this.data.getLength();
+                              for (var i = 0; i < len_recs; i++) {
+                                  var itm = _this.data.getItem(i);
+                                  if (itm[_this.model.wordCol] === target[0] && itm[_this.model.sizeCol] === target[1]) {
+                                      source = _this.data.source;
+                                      source.selected.indices = [i];
+                                      break;
+                                  }
+                              }
                           }
-                          var source = new column_data_source_1.ColumnDataSource({ data: { word: [args[0][0]], weight: [args[0][1]] } });
-                          source.selected.indices = [0]; // update our "selected" indices ...
-                          var data = { word: args[0][0], weight: args[0][1], dimensions: args[1], event: args[2], source: source };
+                          if (source === undefined) {
+                              source = new column_data_source_1.ColumnDataSource({
+                                  data: {
+                                      word: [target[0],],
+                                      weight: [target[1],]
+                                  }
+                              });
+                              source.selected.indices = [0]; // update our "selected" indices ...
+                          }
+                          var data = { word: target[0], weight: target[1], extra: target[2],
+                              dimensions: dimensions, event: event, source: source };
                           // trigger event to python
                           _this.model.trigger_event(new WordClickEvent(data.word, data.weight));
                           // trigger user js click handler
@@ -287,6 +337,8 @@
                               args[_i] = arguments[_i];
                           }
                           if (_this.model.hover) {
+                              if (!args || !args[0])
+                                  return;
                               var data = { word: args[0][0], weight: args[0][1], dimensions: args[1], event: args[2] };
                               _this.model.hover.execute(_this.model, data);
                           }
@@ -313,24 +365,22 @@
                       view: [p.Instance, function () { return new cds_view_1.CDSView(); }],
                       wordCol: [p.String],
                       sizeCol: [p.String],
-                      colors: [p.Any, "blue"],
-                      colorsFun: [p.Instance, null],
-                      fontWeight: [p.String, "normal"],
-                      fontWeightFun: [p.Instance, null],
-                      classes: [p.String, ""],
-                      classesFun: [p.Instance, null],
+                      color: [p.Any, "blue"],
+                      fontWeight: [p.Any, "normal"],
+                      classes: [p.Any, null],
                       hover: [p.Instance, null],
                       click: [p.Instance, null],
                       rotateRatio: [p.Number, 1],
                       minRotation: [p.Number, 0],
                       maxRotation: [p.Number, Math.PI / 2],
                       rotationSteps: [p.Number, 32],
-                      shape: [p.String, "square"]
+                      shape: [p.String, "square"],
+                      weightFactor: [p.Any, null],
                   });
                   this.override({
                       width: 600,
                       height: 400,
-                      background: "#FFFFCC",
+                      background: "#FFFFFF",
                   });
               };
               return WordCloud2;
@@ -358,14 +408,14 @@
           
           
             
-              <div class="bk-root" id="a1e9026b-13fb-4c8f-9cba-b48f5718f7ab" data-root-id="1020"></div>
+              <div class="bk-root" id="88e6d130-0ed5-4a2d-9282-2c16e3790c61" data-root-id="1028"></div>
             
           
         
       
       
-        <script type="application/json" id="1053">
-          {"868f9fe9-2a02-4f65-9303-80f5767ab120":{"roots":{"references":[{"attributes":{"text":"&lt;h2&gt;Specific Colors(By Gender)&lt;/h2&gt;"},"id":"1008","type":"Div"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1004","type":"CDSView"},{"attributes":{},"id":"1021","type":"Selection"},{"attributes":{},"id":"1023","type":"Selection"},{"attributes":{"children":[{"id":"1002","type":"Div"},{"id":"1003","type":"WordCloud2"}]},"id":"1012","type":"Column"},{"attributes":{"classesFun":null,"click":null,"colors":"color","colorsFun":null,"fontWeightFun":null,"height":400,"hover":null,"sizeCol":"weights","source":{"id":"1009","type":"ColumnDataSource"},"view":{"id":"1011","type":"CDSView"},"width":400,"wordCol":"names"},"id":"1010","type":"WordCloud2"},{"attributes":{},"id":"1022","type":"UnionRenderers"},{"attributes":{"source":{"id":"1009","type":"ColumnDataSource"}},"id":"1011","type":"CDSView"},{"attributes":{"text":"&lt;h2&gt;Random Colors&lt;/h2&gt;"},"id":"1005","type":"Div"},{"attributes":{"children":[{"id":"1005","type":"Div"},{"id":"1006","type":"WordCloud2"}]},"id":"1013","type":"Column"},{"attributes":{},"id":"1024","type":"UnionRenderers"},{"attributes":{"children":[{"id":"1016","type":"Div"},{"id":"1017","type":"Div"},{"id":"1018","type":"Div"}]},"id":"1019","type":"Row"},{"attributes":{"classesFun":null,"click":null,"colors":"blue","colorsFun":null,"fontWeightFun":null,"height":400,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1004","type":"CDSView"},"width":400,"wordCol":"names"},"id":"1003","type":"WordCloud2"},{"attributes":{"children":[{"id":"1008","type":"Div"},{"id":"1010","type":"WordCloud2"}]},"id":"1014","type":"Column"},{"attributes":{"callback":null,"data":{"names":["susan","tom","frankie","roger","amy","nicole","joran","mark","brianne","michael","greg","adrian","drew"],"weights":[6,3,8,7,9,10,5,4,7,8,4,6,9]},"selected":{"id":"1021","type":"Selection"},"selection_policy":{"id":"1022","type":"UnionRenderers"}},"id":"1001","type":"ColumnDataSource"},{"attributes":{"children":[{"id":"1012","type":"Column"},{"id":"1013","type":"Column"},{"id":"1014","type":"Column"}]},"id":"1015","type":"Row"},{"attributes":{"text":"&lt;h2&gt;Just Blue&lt;/h2&gt;"},"id":"1002","type":"Div"},{"attributes":{"text":"&lt;pre&gt;\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           colors=\"blue\")# single color    \n    &lt;/pre&gt;","width":400},"id":"1016","type":"Div"},{"attributes":{"text":"&lt;pre&gt;\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           # random choices\n           colors=['pink','blue','green'])    \n    &lt;/pre&gt;","width":400},"id":"1017","type":"Div"},{"attributes":{"children":[{"id":"1015","type":"Row"},{"id":"1019","type":"Row"}]},"id":"1020","type":"Column"},{"attributes":{"classesFun":null,"click":null,"colors":["pink","blue","green"],"colorsFun":null,"fontWeightFun":null,"height":400,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1007","type":"CDSView"},"width":400,"wordCol":"names"},"id":"1006","type":"WordCloud2"},{"attributes":{"text":"&lt;pre&gt;\ncolors_by_gender = ['pink','blue','pink','blue',\n'pink','pink','blue','blue','pink','blue',\n'blue','blue','blue']\ntest_source2 = ColumnDataSource({\"names\":names,\n                                 \"weights\":weights,\n                                 \"color\":colors_by_gender})\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           colors=\"color\") # column name    \n    &lt;/pre&gt;","width":400},"id":"1018","type":"Div"},{"attributes":{"callback":null,"data":{"color":["pink","blue","pink","blue","pink","pink","blue","blue","pink","blue","blue","blue","blue"],"names":["susan","tom","frankie","roger","amy","nicole","joran","mark","brianne","michael","greg","adrian","drew"],"weights":[6,3,8,7,9,10,5,4,7,8,4,6,9]},"selected":{"id":"1023","type":"Selection"},"selection_policy":{"id":"1024","type":"UnionRenderers"}},"id":"1009","type":"ColumnDataSource"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1007","type":"CDSView"}],"root_ids":["1020"]},"title":"Bokeh Application","version":"1.2.0"}}
+        <script type="application/json" id="1061">
+          {"f18fd525-5a80-4a27-8f65-e2d717a0ab9a":{"roots":{"references":[{"attributes":{"text":"&lt;h2&gt;Random Colors&lt;/h2&gt;"},"id":"1005","type":"Div"},{"attributes":{},"id":"1031","type":"Selection"},{"attributes":{},"id":"1032","type":"UnionRenderers"},{"attributes":{"callback":null,"data":{"color":["pink","blue","pink","blue","pink","pink","blue","blue","pink","blue","blue","blue","blue"],"names":["susan","tom","frankie","roger","amy","nicole","joran","mark","brianne","michael","greg","adrian","drew"],"weights":[6,3,8,7,9,10,5,4,7,8,4,6,9]},"selected":{"id":"1031","type":"Selection"},"selection_policy":{"id":"1032","type":"UnionRenderers"}},"id":"1009","type":"ColumnDataSource"},{"attributes":{"text":"&lt;h2&gt;Just Blue&lt;/h2&gt;"},"id":"1002","type":"Div"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1007","type":"CDSView"},{"attributes":{"text":"&lt;h2&gt;Specific Colors(By Gender)&lt;/h2&gt;"},"id":"1008","type":"Div"},{"attributes":{"background":"#EFEFEF","classes":null,"click":null,"color":"color","height":400,"hover":null,"sizeCol":"weights","source":{"id":"1009","type":"ColumnDataSource"},"view":{"id":"1011","type":"CDSView"},"weightFactor":null,"width":400,"wordCol":"names"},"id":"1010","type":"WordCloud2"},{"attributes":{"background":"#DEDEDE","classes":null,"click":null,"color":{"id":"1012","type":"CustomJS"},"height":400,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1014","type":"CDSView"},"weightFactor":null,"width":400,"wordCol":"names"},"id":"1013","type":"WordCloud2"},{"attributes":{"source":{"id":"1009","type":"ColumnDataSource"}},"id":"1011","type":"CDSView"},{"attributes":{"children":[{"id":"1008","type":"Div"},{"id":"1010","type":"WordCloud2"}]},"id":"1022","type":"Column"},{"attributes":{"code":"\n    if( cb_data.word.indexOf(\"o\") &gt;= 0) return \"red\"\n    return \"blue\"\n    "},"id":"1012","type":"CustomJS"},{"attributes":{"children":[{"id":"1002","type":"Div"},{"id":"1003","type":"WordCloud2"}]},"id":"1016","type":"Column"},{"attributes":{"callback":null,"data":{"names":["susan","tom","frankie","roger","amy","nicole","joran","mark","brianne","michael","greg","adrian","drew"],"weights":[6,3,8,7,9,10,5,4,7,8,4,6,9]},"selected":{"id":"1029","type":"Selection"},"selection_policy":{"id":"1030","type":"UnionRenderers"}},"id":"1001","type":"ColumnDataSource"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1014","type":"CDSView"},{"attributes":{"children":[{"id":"1019","type":"Div"},{"id":"1020","type":"Div"}]},"id":"1021","type":"Row"},{"attributes":{"text":"&lt;h2&gt;Colors from JS Callback&lt;/h2&gt;"},"id":"1015","type":"Div"},{"attributes":{"children":[{"id":"1025","type":"Div"},{"id":"1026","type":"Div"}]},"id":"1027","type":"Row"},{"attributes":{"children":[{"id":"1005","type":"Div"},{"id":"1006","type":"WordCloud2"}]},"id":"1017","type":"Column"},{"attributes":{"children":[{"id":"1016","type":"Column"},{"id":"1017","type":"Column"}]},"id":"1018","type":"Row"},{"attributes":{"text":"&lt;pre&gt;\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           colors=\"blue\")# single color    \n    &lt;/pre&gt;","width":400},"id":"1019","type":"Div"},{"attributes":{"text":"&lt;pre&gt;\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           # random choices\n           colors=['pink','blue','green'])    \n    &lt;/pre&gt;","width":400},"id":"1020","type":"Div"},{"attributes":{"children":[{"id":"1018","type":"Row"},{"id":"1021","type":"Row"},{"id":"1024","type":"Row"},{"id":"1027","type":"Row"}]},"id":"1028","type":"Column"},{"attributes":{"children":[{"id":"1015","type":"Div"},{"id":"1013","type":"WordCloud2"}]},"id":"1023","type":"Column"},{"attributes":{"children":[{"id":"1022","type":"Column"},{"id":"1023","type":"Column"}]},"id":"1024","type":"Row"},{"attributes":{"text":"&lt;pre&gt;\ncolors_by_gender = ['pink','blue','pink','blue',\n'pink','pink','blue','blue','pink','blue',\n'blue','blue','blue']\ntest_source2 = ColumnDataSource({\"names\":names,\n                                 \"weights\":weights,\n                                 \"color\":colors_by_gender})\nWordCloud2(source=test_source, \n           wordCol=\"names\", \n           sizeCol=\"weights\", \n           colors=\"color\") # column name    \n    &lt;/pre&gt;","width":400},"id":"1025","type":"Div"},{"attributes":{"text":"&lt;pre&gt;\n    colors_fun = CustomJS(code='''\n    if cb_data.word.indexOf(\"o\") &gt;= 0:\n       return \"red\"\n    return \"blue\"\n    ''')\n    \n    WordCloud2(source=test_source, \n               wordCol=\"names\", \n               sizeCol=\"weights\", \n               colors=colors_fun) # column name    \n        &lt;/pre&gt;","width":400},"id":"1026","type":"Div"},{"attributes":{},"id":"1029","type":"Selection"},{"attributes":{"background":"#EFEFEF","classes":null,"click":null,"color":["pink","blue","green"],"height":400,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1007","type":"CDSView"},"weightFactor":null,"width":400,"wordCol":"names"},"id":"1006","type":"WordCloud2"},{"attributes":{},"id":"1030","type":"UnionRenderers"},{"attributes":{"source":{"id":"1001","type":"ColumnDataSource"}},"id":"1004","type":"CDSView"},{"attributes":{"background":"#DEDEDE","classes":null,"click":null,"color":"blue","height":400,"hover":null,"sizeCol":"weights","source":{"id":"1001","type":"ColumnDataSource"},"view":{"id":"1004","type":"CDSView"},"weightFactor":null,"width":400,"wordCol":"names"},"id":"1003","type":"WordCloud2"}],"root_ids":["1028"]},"title":"Bokeh Application","version":"1.2.0"}}
         </script>
         <script type="text/javascript">
           (function() {
@@ -374,8 +424,8 @@
                 (function(root) {
                   function embed_document(root) {
                     
-                  var docs_json = document.getElementById('1053').textContent;
-                  var render_items = [{"docid":"868f9fe9-2a02-4f65-9303-80f5767ab120","roots":{"1020":"a1e9026b-13fb-4c8f-9cba-b48f5718f7ab"}}];
+                  var docs_json = document.getElementById('1061').textContent;
+                  var render_items = [{"docid":"f18fd525-5a80-4a27-8f65-e2d717a0ab9a","roots":{"1028":"88e6d130-0ed5-4a2d-9282-2c16e3790c61"}}];
                   root.Bokeh.embed.embed_items(docs_json, render_items);
                 
                   }

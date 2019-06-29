@@ -1,6 +1,6 @@
 // import {DataProvider} from "models/widgets/tables/data_table";
 import {WidgetView} from "models/widgets/widget";
-
+import {Arrayable} from "core/types";
 import * as p from "core/properties";
 import {CDSView} from "models/sources/cds_view";
 import {Widget} from "models/widgets";
@@ -27,6 +27,7 @@ function event(event_name: string) {
     cls.prototype.event_name = event_name
   }
 }
+// @setExperimentalDecorators
 @event("word_click_event")
 export class WordClickEvent extends BokehEvent{
     constructor(readonly word:string,readonly weight:number){
@@ -101,17 +102,12 @@ export class WordCloud2View extends WidgetView {
         width: number;
         height: number;
         background: string;
-        colors:string|string[]|((...args:any[]) => string);
-        colorsFun:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
-        fontWeight:number|((...a:any[])=>any),
-        weightFactor:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number>|null,
-
-        fontWeightFun:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
-        classes:string|((...a:any[])=>any),
-        classesFun:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
+        color:string|string[]|((...args:any[]) => string)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
+        fontWeight:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
+        weightFactor:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number>|null;
+        classes:string|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
         hover:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,null>|null;
         click:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,null>|null;
-
         // rotation
         rotateRatio:number,
         minRotation:number,
@@ -130,10 +126,11 @@ export class WordCloud2View extends WidgetView {
         this.prepare()
     }
     prepare(){
-        if(this.model.fontWeightFun && typeof this.model.fontWeightFun.execute === "function"){
+        if(this.model.fontWeight && typeof (this.model.fontWeight as IAttr)['execute'] === "function"){
+            const cb_func:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,number> = this.model.weightFactor as CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,number>;
             this.model.fontWeight = (word:string,weight:number,font_size:number)=>{
                 const data ={word:word,weight:weight,font_size:font_size};
-                return this.model.fontWeightFun?this.model.fontWeightFun.execute(this.model,data):"normal";
+                return cb_func.execute(this.model,data);
             }
         }
         if(this.model.weightFactor && typeof (this.model.weightFactor as IAttr)['execute'] === "function"){
@@ -143,27 +140,29 @@ export class WordCloud2View extends WidgetView {
                 return cb_func?cb_func.execute(this.model,data):this.DEFAULT_WEIGHT_FACTOR
             }
         }
-        if(this.model.classesFun && typeof this.model.classesFun.execute === "function"){
+        if(this.model.classes && typeof (this.model.classes as IAttr)['execute'] === "function"){
+            const cb_func:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string> = this.model.classes as CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
             this.model.classes = (word:string,weight:number,font_size:number)=>{
                 const data ={word:word,weight:weight,font_size:font_size};
-                return this.model.classesFun?this.model.classesFun.execute(this.model,data):"normal";
+                return cb_func.execute(this.model,data);
             }
         }
-        if(this.model.colorsFun && typeof this.model.colorsFun.execute === "function"){
+        if(this.model.color && typeof (this.model.color as IAttr)['execute'] === "function"){
             // its a callback
-            this.model.colors = (word:string,weight:number,font_size:number,distance:number,theta:number)=>{
+            const cb_func:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string> = this.model.color as CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
+            this.model.color = (word:string,weight:number,font_size:number,distance:number,theta:number)=>{
                 const data ={word:word,weight:weight,font_size:font_size,distance:distance,theta:theta};
-                return this.model.colorsFun?this.model.colorsFun.execute(this.model,data):"pink";
+                return cb_func.execute(this.model,data);
             }
-        }else if (typeof this.model.colors==="object" && typeof this.model.colors.slice === "function"){
+        }else if (typeof this.model.color==="object" && typeof (this.model.color as IAttr)['slice'] === "function"){
             // its a list??
-            const original_list:string[] = this.model.colors;
-            this.model.colors = ()=>choose_str(original_list);
-        }else if (typeof this.model.colors==="string"){
-            const col = this.model.source.get_column(this.model.colors);
+            const original_list:string[] = this.model.color as string[];
+            this.model.color = ()=>choose_str(original_list);
+        }else if (typeof this.model.color==="string"){
+            const col = this.model.source.get_column(this.model.color);
             if(col && col.length>0) {
                 const data: { [key: string]: string } = {};
-                const colors = this.model.source.get_column(this.model.colors);
+                const colors = this.model.source.get_column(this.model.color);
                 const keys = this.model.source.get_column(this.model.wordCol)
                 if (keys && keys.length && colors && colors.length) {
                     for (let i = 0; i < keys.length; i++) {
@@ -172,7 +171,7 @@ export class WordCloud2View extends WidgetView {
                         }
                     }
                 }
-                this.model.colors = (word: string): string => data[word] as string;
+                this.model.color = (word: string): string => data[word] as string;
             }
         }
 
@@ -237,7 +236,7 @@ export class WordCloud2View extends WidgetView {
             fontFamily: 'Times, serif',
             gridSize: Math.round(16 *  this.model.width / 1024),
             weightFactor: this.model.weightFactor?this.model.weightFactor:this.DEFAULT_WEIGHT_FACTOR ,
-            color: this.model.colors,
+            color: this.model.color,
             rotateRatio: this.model.rotateRatio,
             minRotation: this.model.minRotation,
             maxRotation: this.model.maxRotation,
@@ -248,10 +247,30 @@ export class WordCloud2View extends WidgetView {
             classes:this.model.classes,
             fontWeight:this.model.fontWeight,
             shape: this.model.shape,
-            click: (...args:any[])=>{
-                const source = new ColumnDataSource({data:{word:[args[0][0]],weight:[args[0][1]]}});
-                source.selected.indices =[0]; // update our "selected" indices ...
-                const data = {word:args[0][0],weight:args[0][1],dimensions:args[1],event:args[2],source:source};
+            click: (target:[string,number,any],dimensions:[number,number,number,number],event:any)=>{
+                let source:ColumnDataSource|undefined=undefined;
+                if(this.model.sizeCol){
+                    const len_recs = this.data.getLength();
+                    for(let i=0;i<len_recs;i++){
+                        const itm = this.data.getItem(i);
+                        if(itm[this.model.wordCol] === target[0] && itm[this.model.sizeCol]===target[1]){
+                            source = this.data.source
+                            source.selected.indices = [i]
+                            break;
+                        }
+                    }
+                }
+                if(source===undefined) {
+                    source = new ColumnDataSource({
+                        data: {
+                            word: [target[0],] as unknown as Arrayable,
+                            weight: [target[1],] as unknown as Arrayable
+                        }
+                    });
+                    source.selected.indices = [0]; // update our "selected" indices ...
+                }
+                const data = {word:target[0],weight:target[1],extra:target[2],
+                              dimensions:dimensions,event:event,source:source};
                 // trigger event to python
                 this.model.trigger_event(new WordClickEvent(data.word,data.weight))
                 // trigger user js click handler
@@ -281,12 +300,9 @@ export namespace WordCloud2 {
         view: p.Property<CDSView>
         wordCol: p.Property<string>
         sizeCol: p.Property<string>
-        colors: p.Property<any>
-        colorsFun:p.Property<CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null>
-        fontWeight:p.Property<string|((...a:any[])=>any)>
-        fontWeightFun:p.Property<CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null>
-        classes:p.Property<string|((...a:any[])=>any)>
-        classesFun:p.Property<CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null>
+        color: p.Property<any>
+        fontWeight:p.Property<string|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null>
+        classes:p.Property<string|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null>
         hover:p.Property<CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,null>|null>
         click:p.Property<CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,null>|null>
         rotateRatio:p.Property<number>
@@ -319,12 +335,9 @@ export class WordCloud2 extends Widget {
             view: [p.Instance, () => new CDSView()],
             wordCol: [p.String],
             sizeCol: [p.String],
-            colors: [p.Any, "blue"],
-            colorsFun: [p.Instance,   null],
-            fontWeight:[p.String, "normal"],
-            fontWeightFun:[p.Instance, null],
-            classes:[p.String, ""],
-            classesFun:[p.Instance, null],
+            color: [p.Any, "blue"],
+            fontWeight:[p.Any, "normal"],
+            classes:[p.Any, null],
             hover:[p.Instance, null],
             click:[p.Instance, null],
             rotateRatio:[p.Number, 1],

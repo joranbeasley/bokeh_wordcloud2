@@ -22,7 +22,7 @@ data = [
 ]
 names,weights = zip(*data)
 test1 = ColumnDataSource({'names':names,'weights':weights})
-wordcloud = WordCloud2(source=test1, wordCol="names", sizeCol="weights", colors=['pink', 'blue', 'green'])
+wordcloud = WordCloud2(source=test1, wordCol="names", sizeCol="weights", color=['pink', 'blue', 'green'])
 
 def clicked_word(evt):
     data=test1.data

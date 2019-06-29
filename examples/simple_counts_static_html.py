@@ -19,5 +19,5 @@ data = [
 ]
 names,weights = zip(*data)
 test1 = ColumnDataSource({'names':names,'weights':weights})
-sdp = WordCloud2(source=test1,wordCol="names",sizeCol="weights",colors=['pink','blue','green'])
+sdp = WordCloud2(source=test1,wordCol="names",sizeCol="weights",color=['pink','blue','green'])
 show(sdp)

@@ -1,6 +1,7 @@
 import math
 from bokeh.core.property.container import Array, List
 from bokeh.core.property.either import Either
+from bokeh.core.property.enum import Enum
 from bokeh.core.property.instance import Instance
 from bokeh.core.property.primitive import String, Float, Int
 from bokeh.events import Event
@@ -37,12 +38,14 @@ class _WordCloud2Meta(Widget):
         "https://raw.githubusercontent.com/timdream/wordcloud2.js/gh-pages/src/wordcloud2.js",
 
     ]
-
+myEnum = "circle", "cartoid", "diamond", "square", "triangle-forward", "triangle", "pentagon", "star"
 
 
 class WordCloud2(_WordCloud2Meta):
     """
     Provides a Bokeh Interface to WordCloud  (https://wordcloud2-js.timdream.org)
+
+    As Such it accepts Most of the same arguments.
 
     .. note::
 
@@ -52,7 +55,7 @@ class WordCloud2(_WordCloud2Meta):
 
     """
     source = Instance(DataSource, help="""
-        The source of data for the widget.
+        **required** The source of data for the widget.
         
         .. code-block:: python
         
@@ -104,11 +107,8 @@ class WordCloud2(_WordCloud2Meta):
          wc4 = WordCloud(source=data,wordCol="words", sizeCol="weights", color=callback)
          
     """)
-    # colorsFun = Instance(CustomJS,help="a customjs function that will determine the colors (see `cb_obj`)")
     fontWeight = Either(String,Instance(CustomJS),default="normal",help="the font weight to use, or a CustomJS that returns a Font weight(eg. 'bolder','600','normal') (see `cb_object`)")
-    # fontWeightFun = Instance(CustomJS,help="a customjs function that will determine the fontWeight(see `cb_obj`)")
     classes = Either(String,Instance(CustomJS),help="a class name or function to use ... only works if using DOM elements, which are currently unsupported... so this does nothing for now")
-    # classesFun = Instance(CustomJS,help="see `classes`")
     weightFactor = Either(Instance(CustomJS),Float,help="""
     a multiplier to apply to the sizes or a CustomJS instance(see `cb_data`)
     
@@ -119,16 +119,45 @@ class WordCloud2(_WordCloud2Meta):
        
        # or you can specify a callback (eg cube the given size)
        callback = CustomJS(code="return Math.pow(cb_data.size, 3))
+       
     """)
 
     rotateRatio = Float(help="the odds of a given word rotating between 0-1, if 1 then the word will ALWAYS rotate, if 0 it will NEVER rotate, at 0.2 it has a 20% chance of rotating",default=1)
     minRotation = Float(help="the minimum amount(in radians) to rotate",default=0)
     maxRotation = Float(help="the maximum amount(in radians) to rotate",default=math.pi/2.0)
     rotationSteps = Int(help="the number of slices to cut the rotation range into",default=32)
-    shape = String(help="the shape of the wordcloud ENUM(circle, cartoid, diamond, square, triangle-forward, triangle, pentagon, star)",default="square")
 
-    hover = Instance(CustomJS,help="js callback to execute on word hover (see `cb_data`)")
-    click = Instance(CustomJS,help="js callback to execute on word hover (see `cb_data`)")
+    shape = Enum(*myEnum, help="the shape of the wordcloud",default="square")
+
+    hover = Instance(CustomJS,help="""
+    js callback to execute on word hover 1
+    
+    `cb_data` provides: `cb_data.word`, and `cb_data.weight`
+    
+    .. code-block:: python
+    
+       wordcloud.hover = CustomJS(code="console.log(`Hover On: ${cb_data.word} - x${cb_data.weight}`)")
+    
+  
+    """)
+    click = Instance(CustomJS,help="""
+    js callback to execute on word click
+    
+    .. note::
+    
+       this is **NOT** the same as :meth:`bokeh_wordcloud2.WordCloud2.on_click`, which runs inside the backend on a
+       bokeh server, where as this attribute expects `CustomJS` that is run on the client.
+    
+    
+    `cb_data` provides: `cb_data.word`, and `cb_data.weight`
+    
+    .. code-block:: python
+    
+       wordcloud.click = CustomJS(code='''
+       console.log(`You Clicked!!!!: ${cb_data.word} - x${cb_data.weight}`)
+       ''')
+       
+    """)
 
     def __init__(self, **kw):
         super(WordCloud2, self).__init__(**kw)
@@ -138,8 +167,23 @@ class WordCloud2(_WordCloud2Meta):
         """
         bind a python callback to word clicks, this only works when running a bokeh server
 
-        :param python_callback:
-        :return:
+        .. note::
+
+           this is **NOT** the same as :attr:`bokeh_wordcloud2.WordCloud2.click`, which runs on the clients browser,
+           where as this method expects a python function that is run on the bokeh-server.
+
+        the function that recieves the call back will recieve  WordClick Event, that has a word and weight attribute
+
+        .. code-block:: python
+
+           def my_handler(event):
+               print("Clicked Word: %r"%event.word)
+               # update the view filters
+               some_view.filters = [1,2,4,5,7,8]
+
+           wordcloud.on_click(my_handler)
+
+        :param python_callback: a python function to call when a word is clicked
         """
         self.on_event(WordClick, python_callback)
 
