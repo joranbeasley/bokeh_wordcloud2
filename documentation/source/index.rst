@@ -13,8 +13,14 @@ This package aims to provide a wordcloud extension for bokeh
    :maxdepth: 2
 
    getting_started
+   wordcloud2
 
 `Check out an interactive short tutorial in jupyter <https://gke.mybinder.org/v2/gh/joranbeasley/bokeh-wordcloud-notebook/master?filepath=bokeh_wordcloud2.ipynb>`_
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/joranbeasley/bokeh-wordcloud-notebook/master?filepath=bokeh_wordcloud2.ipynb
+
+
 
 .. raw:: html
    :file: _static/simple_options_colors.html

@@ -20,9 +20,10 @@ data = [
 names,weights = zip(*data)
 js=CustomJS(code="""
 console.log("SIZE:",cb_data.size)
-return Math.pow(cb_data.size, 3.3) *  cb_obj.height / 1024
+modifier = (cb_obj.height>cb_obj.width?cb_obj.height:cb_obj.width)/1024
+return Math.pow(cb_data.size, 3.3) *  modifier
 """)
 test1 = ColumnDataSource({'names':names,'weights':weights})
 sdp = WordCloud2(source=test1,wordCol="names",sizeCol="weights",colors=['pink','blue','green'],
-                 weightFactor=10)
+                 weightFactor=10,width=1400,height=200)
 show(sdp)

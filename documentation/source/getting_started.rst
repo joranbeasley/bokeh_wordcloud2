@@ -20,6 +20,15 @@ the easiest way to install is with pip
 
 Examples
 --------
+Interactive Jupyter Notebook
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Feel free to play with the jupyter notebook available at https://gke.mybinder.org/v2/gh/joranbeasley/bokeh-wordcloud-notebook/master?filepath=bokeh_wordcloud2.ipynb
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/joranbeasley/bokeh-wordcloud-notebook/master?filepath=bokeh_wordcloud2.ipynb
+
+
 First Word Cloud
 ~~~~~~~~~~~~~~~~
 here is a super simple word cloud to get you started

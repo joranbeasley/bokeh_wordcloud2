@@ -12,9 +12,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../..'))
+# sys.path.insert(1, os.path.abspath('../'))
+
+import bokeh_wordcloud2
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +28,9 @@ copyright = '2019, joran beasley'
 author = 'joran beasley'
 
 # The short X.Y version
-version = ''
+version = bokeh_wordcloud2.__VERSION__
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+# release = __VERSION_FULL__
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,6 +44,13 @@ release = '1.0'
 # ones.
 extensions = [
     'sphinx.ext.githubpages',
+    'sphinx.ext.autodoc',
+    'bokeh.sphinxext.bokeh_autodoc',
+    'bokeh.sphinxext.bokeh_color',
+    'bokeh.sphinxext.bokeh_enum',
+    'bokeh.sphinxext.bokeh_model',
+    'bokeh.sphinxext.bokeh_prop',
+    'bokeh.sphinxext.collapsible_code_block',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

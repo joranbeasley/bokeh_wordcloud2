@@ -1,10 +1,12 @@
 from setuptools import setup
-
+from bokeh_wordcloud2 import __VERSION__
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+
 setup(
     name='bokeh_wordcloud2',
-    version='0.9',
+    version=__VERSION__,
     packages=['bokeh_wordcloud2'],
     package_data={
         'bokeh_wordcloud2':['typescript/extension_bokeh_wordcloud2.ts'],
@@ -19,6 +21,8 @@ setup(
     description='a bokeh extension that implements a wordcloud (https://wordcloud2-js.timdream.org)',
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 2.7",
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
