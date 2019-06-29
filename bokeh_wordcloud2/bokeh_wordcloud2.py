@@ -126,7 +126,8 @@ class WordCloud2(_WordCloud2Meta):
     minRotation = Float(help="the minimum amount(in radians) to rotate",default=0)
     maxRotation = Float(help="the maximum amount(in radians) to rotate",default=math.pi/2.0)
     rotationSteps = Int(help="the number of slices to cut the rotation range into",default=32)
-
+    gridSize = Float(help="the distance between words, the bigger the gridsize, the more distance between words.",default=16)
+    fontFamily = String(help="the fontFamily to use.",default="Times, serif")
     shape = Enum(*myEnum, help="the shape of the wordcloud",default="square")
 
     hover = Instance(CustomJS,help="""

@@ -104,6 +104,7 @@ export class WordCloud2View extends WidgetView {
         background: string;
         color:string|string[]|((...args:any[]) => string)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
         fontWeight:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>|null;
+        fontFamily:string;
         weightFactor:number|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_weightFactor_cb>,number>|null;
         classes:string|((...a:any[])=>any)|CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,string>;
         hover:CallbackLike1<WordCloud2,Partial<data_ob_color_cb>,null>|null;
@@ -115,6 +116,7 @@ export class WordCloud2View extends WidgetView {
         rotationSteps:number,
 
         shape:string,
+        gridSize:number,
     };
     private data: DataProvider;
     private DEFAULT_WEIGHT_FACTOR(size:number){
@@ -230,11 +232,11 @@ export class WordCloud2View extends WidgetView {
         canvas.height = this.model.height;
 
         // const colors: string[] = this.model.colors ? this.model.colors : [this.model.color,];
-
+        const default_grid_size = Math.round(16 *  this.model.width / 1024)
         const opts = {
             list: sizes,
-            fontFamily: 'Times, serif',
-            gridSize: Math.round(16 *  this.model.width / 1024),
+            fontFamily: this.model.fontFamily?this.model.fontFamily:'Times, serif',
+            gridSize: this.model.gridSize?this.model.gridSize:default_grid_size,
             weightFactor: this.model.weightFactor?this.model.weightFactor:this.DEFAULT_WEIGHT_FACTOR ,
             color: this.model.color,
             rotateRatio: this.model.rotateRatio,
@@ -309,6 +311,8 @@ export namespace WordCloud2 {
         minRotation:p.Property<number>
         maxRotation:p.Property<number>
         rotationSteps:p.Property<number>
+        gridSize:p.Property<number>
+        fontFamily:p.Property<string>
         shape:p.Property<string>
         weightFactor:p.Property<number|((...args:any[])=>number)|null>
     }
@@ -344,6 +348,8 @@ export class WordCloud2 extends Widget {
             minRotation:[p.Number,  0],
             maxRotation:[p.Number,  Math.PI/2],
             rotationSteps:[p.Number,  32],
+            gridSize:[p.Number,  null],
+            fontFamily:[p.String,  null],
             shape: [p.String, "square"],
             weightFactor: [p.Any, null],
 
