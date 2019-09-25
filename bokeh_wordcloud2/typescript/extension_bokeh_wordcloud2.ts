@@ -348,8 +348,8 @@ export class WordCloud2 extends Widget {
             minRotation:[p.Number,  0],
             maxRotation:[p.Number,  Math.PI/2],
             rotationSteps:[p.Number,  32],
-            gridSize:[p.Number,  null],
-            fontFamily:[p.String,  null],
+            gridSize:[p.Number,  16],
+            fontFamily:[p.String,  "Times, Serif"],
             shape: [p.String, "square"],
             weightFactor: [p.Any, null],
 
